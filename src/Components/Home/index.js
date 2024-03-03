@@ -5,24 +5,7 @@ function Home() {
   const [data, setData] = useState({});
   const [name, setName] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const getWeatherImagePath = (weatherCondition) => {
-    switch (weatherCondition) {
-      case "Clouds":
-        return "./assets/clouds.png";
-      case "Clear":
-        return "./assets/clear-sky.png";
-      case "Haze":
-        return "./assets/haze.png";
-      case "Drizzle":
-        return "./assets/drizzle.png";
-      case "Rain":
-        return "./assets/rain.png";
-      default:
-        return "./assets/cloud-icon.png";
-    }
-  };
+  const [loading, setLoading] = useState(false); // for conditional rendering
 
   const handleClick = () => {
     if (name !== "") {
@@ -32,23 +15,25 @@ function Home() {
         .get(apiUrl)
         .then((res) => {
           setLoading(true);
-          const imagePath = getWeatherImagePath(res.data.weather[0].main);
           console.log(res.data);
           setData({
             celcius: res.data.main.temp,
             name: res.data.name,
             humidity: res.data.main.humidity,
             speed: res.data.wind.speed,
-            image: imagePath,
+            image: `https://openweathermap.org/img/wn/${res.data.weather[0].icon}@2x.png`,
+            description: res.data.weather[0].description
           });
+        
           setError("");
         })
         .catch((err) => {
+          console.error(err);
           if (err.response && err.response.status === 404) {
             setError("City not found. Please enter a valid city name.");
           } else {
             setError("An unexpected error occurred. Please try again later.");
-            console.error(err);
+            
           }
           setLoading(true);
           setData({}); //data will be reset here
@@ -81,12 +66,14 @@ function Home() {
         ) : Object.keys(data).length > 0 ? (
           <div className="weather-info">
             <img src={data.image} alt="weather" />
+            <h3>{data.description} </h3>
+
             <h1>{Math.round(data.celcius)}°C</h1>
             <h2>{data.name}</h2>
 
             <div className="details">
               <div className="col">
-                <img src="./assets/humid.png" alt="humidity" />
+                <img src="./assets/humidity.png" alt="humidity" />
                 <div>
                   <p>{Math.round(data.humidity)}%</p>
                   <p>Humidity</p>
